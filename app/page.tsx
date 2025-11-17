@@ -32,13 +32,18 @@ function PricingSection() {
         return;
       }
 
-      const { data: subscription } = await supabase
+      const { data: subscription, error: subError } = await supabase
         .from('user_subscriptions')
         .select('status, current_period_end')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .gte('current_period_end', new Date().toISOString())
-        .single();
+        .maybeSingle(); // 使用 maybeSingle() 代替 single()，避免没有记录时报错
+
+      // 如果查询出错但不是"没有找到记录"的错误，记录日志
+      if (subError && subError.code !== 'PGRST116') {
+        console.error('查询订阅信息失败:', subError);
+      }
 
       setUserPlan(subscription ? 'premium' : 'free');
     } catch (error) {
