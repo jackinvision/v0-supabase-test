@@ -49,14 +49,12 @@ export async function POST(request: NextRequest) {
     const checkoutSession = await creem.createCheckoutSession({
       product_id,
       success_url: success_url || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://v0-supabase-starter-next-js.vercel.app'}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      customer_email: user.email,
-      metadata: {
-        user_id: user.id,
-        user_email: user.email || '',
-      },
     });
 
-    console.log('支付会话创建成功:', { session_id: checkoutSession.id });
+    console.log('支付会话创建成功:', {
+      session_id: checkoutSession.id,
+      checkout_url: checkoutSession.checkout_url
+    });
 
     return NextResponse.json({
       success: true,

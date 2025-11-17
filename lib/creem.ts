@@ -1,8 +1,6 @@
 interface CreemCheckoutRequest {
   product_id: string;
   success_url: string;
-  customer_email?: string;
-  metadata?: Record<string, string>;
 }
 
 interface CreemCheckoutResponse {
