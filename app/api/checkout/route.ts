@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { product_id, success_url, cancel_url } = await request.json();
+    const { product_id, success_url } = await request.json();
 
     if (!product_id) {
       return NextResponse.json(
@@ -49,7 +49,6 @@ export async function POST(request: NextRequest) {
     const checkoutSession = await creem.createCheckoutSession({
       product_id,
       success_url: success_url || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://v0-supabase-starter-next-js.vercel.app'}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: cancel_url || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://v0-supabase-starter-next-js.vercel.app'}/payment/cancel`,
       customer_email: user.email,
       metadata: {
         user_id: user.id,
@@ -57,12 +56,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log('支付会话创建成功:', { session_id: checkoutSession.session_id });
+    console.log('支付会话创建成功:', { session_id: checkoutSession.id });
 
     return NextResponse.json({
       success: true,
       checkout_url: checkoutSession.checkout_url,
-      session_id: checkoutSession.session_id,
+      session_id: checkoutSession.id, // 使用实际的字段名
     });
 
   } catch (error) {

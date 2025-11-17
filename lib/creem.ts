@@ -1,14 +1,19 @@
 interface CreemCheckoutRequest {
   product_id: string;
   success_url: string;
-  cancel_url: string;
   customer_email?: string;
   metadata?: Record<string, string>;
 }
 
 interface CreemCheckoutResponse {
+  id: string;
+  object: string;
+  product: string;
+  units: number;
+  status: string;
   checkout_url: string;
-  session_id: string;
+  success_url: string;
+  mode: string;
 }
 
 interface CreemCustomer {
@@ -59,13 +64,19 @@ class CreemClient {
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`,
+        'x-api-key': this.apiKey, // 修复：使用 x-api-key 而不是 Authorization Bearer
         ...options.headers,
       },
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error('Creem API 错误:', {
+        status: response.status,
+        statusText: response.statusText,
+        url,
+        errorData
+      });
       throw new Error(
         `Creem API error: ${response.status} ${response.statusText} - ${
           errorData.message || 'Unknown error'
@@ -80,7 +91,8 @@ class CreemClient {
    * 创建支付会话
    */
   async createCheckoutSession(data: CreemCheckoutRequest): Promise<CreemCheckoutResponse> {
-    return this.makeRequest<CreemCheckoutResponse>('/v1/checkout/sessions', {
+    // 使用正确的端点：/v1/checkouts
+    return this.makeRequest<CreemCheckoutResponse>('/v1/checkouts', {
       method: 'POST',
       body: JSON.stringify(data),
     });
