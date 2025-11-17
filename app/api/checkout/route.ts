@@ -38,6 +38,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 记录请求信息（用于调试）
+    console.log('创建支付会话请求:', {
+      product_id,
+      customer_email: user.email,
+      api_url: process.env.CREEM_API_URL || 'https://test-api.creem.io'
+    });
+
     // 创建Creem支付会话
     const checkoutSession = await creem.createCheckoutSession({
       product_id,
@@ -50,6 +57,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log('支付会话创建成功:', { session_id: checkoutSession.session_id });
+
     return NextResponse.json({
       success: true,
       checkout_url: checkoutSession.checkout_url,
@@ -58,10 +67,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('创建支付会话失败:', error);
+    
+    // 返回更详细的错误信息
+    const errorMessage = error instanceof Error ? error.message : '未知错误';
+    
     return NextResponse.json(
       {
         error: '创建支付会话失败',
-        message: error instanceof Error ? error.message : '未知错误'
+        message: errorMessage,
+        details: error instanceof Error ? error.stack : undefined
       },
       { status: 500 }
     );
