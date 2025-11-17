@@ -11,7 +11,6 @@ import { createClient } from '@/lib/supabase/client'
 function PricingSection() {
   const [userPlan, setUserPlan] = useState<'free' | 'premium' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const supabase = createClient();
 
   useEffect(() => {
     checkUserPlan();
@@ -19,6 +18,13 @@ function PricingSection() {
 
   const checkUserPlan = async () => {
     try {
+      // 检查是否配置了 Supabase
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        setUserPlan('free');
+        return;
+      }
+
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -36,6 +42,7 @@ function PricingSection() {
 
       setUserPlan(subscription ? 'premium' : 'free');
     } catch (error) {
+      console.error('检查用户计划失败:', error);
       setUserPlan('free');
     }
   };
@@ -44,6 +51,13 @@ function PricingSection() {
     try {
       setIsLoading(true);
 
+      // 检查是否配置了 Supabase
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        alert('支付功能暂未配置，请联系管理员');
+        return;
+      }
+
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
