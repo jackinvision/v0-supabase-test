@@ -80,7 +80,9 @@ function PricingSection() {
       if (data.checkout_url) {
         window.location.href = data.checkout_url;
       } else {
-        alert('创建支付会话失败，请稍后重试');
+        // 显示具体的错误信息
+        const errorMessage = data.message || data.error || '创建支付会话失败，请稍后重试';
+        alert(errorMessage);
       }
     } catch (error) {
       console.error('订阅失败:', error);

@@ -4,6 +4,18 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
+    // 检查 Creem 配置
+    if (!process.env.CREEM_API_KEY) {
+      console.error('CREEM_API_KEY 未配置');
+      return NextResponse.json(
+        { 
+          error: '支付功能暂未配置',
+          message: 'CREEM_API_KEY 环境变量未设置，请联系管理员'
+        },
+        { status: 503 }
+      );
+    }
+
     const supabase = await createClient();
     const creem = createCreemClient();
 
